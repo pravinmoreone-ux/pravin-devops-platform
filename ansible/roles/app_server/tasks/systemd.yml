@@ -1,0 +1,15 @@
+---
+- name: Deploy application systemd service
+  ansible.builtin.template:
+    src: app.service.j2
+    dest: /etc/systemd/system/devops-app.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart application
+
+- name: Enable application service
+  ansible.builtin.systemd:
+    name: devops-app
+    enabled: true
+    daemon_reload: true

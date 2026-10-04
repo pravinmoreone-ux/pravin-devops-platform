@@ -1,0 +1,21 @@
+---
+- name: Check installed Terraform version
+  ansible.builtin.command: terraform version
+  register: terraform_check
+  changed_when: false
+  failed_when: false
+
+- name: Download Terraform
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/terraform/1.15.6/terraform_1.15.6_linux_amd64.zip"
+    dest: /tmp/terraform.zip
+    mode: "0644"
+  when: terraform_check.rc != 0
+
+- name: Extract Terraform
+  ansible.builtin.unarchive:
+    src: /tmp/terraform.zip
+    dest: /usr/local/bin
+    remote_src: true
+    mode: "0755"
+  when: terraform_check.rc != 0

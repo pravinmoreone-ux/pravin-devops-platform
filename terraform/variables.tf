@@ -37,9 +37,11 @@ variable "availability_zones" {
   ]
 }
 
+
 variable "key_name" {
   description = "Existing AWS EC2 key pair name"
   type        = string
+  default     = "linux-ec2-lab-key"
 }
 
 variable "jump_instance_type" {

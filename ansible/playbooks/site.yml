@@ -1,0 +1,14 @@
+---
+- name: Configure DevOps jump servers
+  hosts: role_devops_jump_server
+  become: true
+
+  roles:
+    - jump_server
+
+- name: Configure application servers
+  hosts: role_app_server
+  become: true
+
+  roles:
+    - app_server

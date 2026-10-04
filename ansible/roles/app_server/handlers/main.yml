@@ -1,0 +1,6 @@
+---
+- name: Restart application
+  ansible.builtin.systemd:
+    name: devops-app
+    state: restarted
+    daemon_reload: true

@@ -1,0 +1,33 @@
+---
+- name: Update installed packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install base DevOps packages
+  ansible.builtin.dnf:
+    name:
+      - git
+      - python3
+      - python3-pip
+      - jq
+      - unzip
+      - tar
+      - gzip
+      - podman
+    state: present
+
+- name: Install Terraform
+  ansible.builtin.import_tasks: terraform.yml
+
+- name: Install AWS CLI
+  ansible.builtin.import_tasks: aws_cli.yml
+
+- name: Install kubectl
+  ansible.builtin.import_tasks: kubectl.yml
+
+- name: Install Helm
+  ansible.builtin.import_tasks: helm.yml
+
+- name: Install OPA
+  ansible.builtin.import_tasks: opa.yml

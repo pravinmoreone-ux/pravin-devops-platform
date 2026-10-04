@@ -1,0 +1,13 @@
+---
+- name: Check OPA installation
+  ansible.builtin.command: opa version
+  register: opa_check
+  changed_when: false
+  failed_when: false
+
+- name: Download OPA
+  ansible.builtin.get_url:
+    url: "https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static"
+    dest: /usr/local/bin/opa
+    mode: "0755"
+  when: opa_check.rc != 0

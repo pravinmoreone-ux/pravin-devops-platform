@@ -22,7 +22,7 @@ resource "aws_instance" "jump" {
   associate_public_ip_address = true
 
   root_block_device {
-    volume_size = 30
+    volume_size = 20
     volume_type = "gp3"
     encrypted   = true
   }
