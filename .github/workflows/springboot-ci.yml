@@ -5,6 +5,7 @@ on:
     paths:
       - "apps/springboot/**"
       - ".github/workflows/springboot-ci.yml"
+
   push:
     branches:
       - main
@@ -40,4 +41,10 @@ jobs:
         run: echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Show image tag
-        run: echo "Image tag: ${{ steps.image.outputs.tag }}"        
+        run: echo "Image tag: ${{ steps.image.outputs.tag }}"
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }} \
+            .
