@@ -45,6 +45,4 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build \
-            -t ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }} \
-            .
+          docker build -t "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}" .
