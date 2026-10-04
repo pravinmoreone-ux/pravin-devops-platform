@@ -59,3 +59,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: |
+          docker push \
+            "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}"          
