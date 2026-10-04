@@ -13,6 +13,10 @@ on:
       - "apps/springboot/**"
       - ".github/workflows/springboot-ci.yml"
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Spring Boot
@@ -45,4 +49,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}" .
+          docker build \
+            -t "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}" \
+            .
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
