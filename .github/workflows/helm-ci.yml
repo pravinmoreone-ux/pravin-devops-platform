@@ -1,0 +1,32 @@
+name: Helm CI
+
+on:
+  pull_request:
+    paths:
+      - "helm/**"
+      - ".github/workflows/helm-ci.yml"
+
+  push:
+    branches:
+      - main
+    paths:
+      - "helm/**"
+      - ".github/workflows/helm-ci.yml"
+
+jobs:
+  helm:
+    name: Helm Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint helm/springboot
+
+      - name: Helm template
+        run: helm template springboot helm/springboot
