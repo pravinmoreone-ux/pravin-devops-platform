@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: springboot
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/pravinmoreone-ux/pravin-devops-platform.git
+    targetRevision: main
+    path: helm/springboot
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
