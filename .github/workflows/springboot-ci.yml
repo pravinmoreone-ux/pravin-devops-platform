@@ -1,0 +1,36 @@
+name: Spring Boot CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/springboot/**"
+      - ".github/workflows/springboot-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/springboot/**"
+      - ".github/workflows/springboot-ci.yml"
+
+jobs:
+  build:
+    name: Build Spring Boot
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/springboot
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build and test
+        run: mvn -B clean test package
