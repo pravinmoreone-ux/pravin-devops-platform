@@ -17,9 +17,13 @@ permissions:
   contents: read
   packages: write
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot
+
 jobs:
   build:
-    name: Build Spring Boot
+    name: Build and Push Spring Boot
     runs-on: ubuntu-latest
 
     defaults:
@@ -48,19 +52,14 @@ jobs:
         run: echo "Image tag: ${{ steps.image.outputs.tag }}"
 
       - name: Build Docker image
-        run: |
-          docker build \
-            -t "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}" \
-            .
+        run: docker build -t "${IMAGE_NAME}:${{ steps.image.outputs.tag }}" .
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Docker image
-        run: |
-          docker push \
-            "ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot:${{ steps.image.outputs.tag }}"          
+        run: docker push "${IMAGE_NAME}:${{ steps.image.outputs.tag }}"
