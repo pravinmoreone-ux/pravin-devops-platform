@@ -45,7 +45,10 @@ jobs:
         run: mvn -B clean test package
 
       - name: SonarCloud SAST
-        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        run: >
+          mvn -B sonar:sonar
+          -Dsonar.organization=pravinmoreone-ux
+          -Dsonar.projectKey=pravin-devops-platform
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
