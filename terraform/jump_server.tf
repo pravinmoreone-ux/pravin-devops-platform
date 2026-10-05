@@ -20,6 +20,9 @@ resource "aws_instance" "jump" {
   vpc_security_group_ids      = [aws_security_group.jump.id]
   key_name                    = var.key_name
   associate_public_ip_address = true
+  metadata_options {
+    http_tokens = "required"
+  }
 
   root_block_device {
     volume_size = 20

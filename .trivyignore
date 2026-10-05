@@ -1,0 +1,5 @@
+# AWS-0104: Unrestricted egress is intentionally allowed for the jump and private app servers.
+# Jump server requires outbound AWS/GitHub/tooling access.
+# App server requires outbound access through NAT for package updates and dependencies.
+# Production hardening: replace broad egress with VPC endpoints and controlled egress/proxy.
+AWS-0104

@@ -19,6 +19,9 @@ resource "aws_instance" "app" {
   subnet_id              = aws_subnet.private_a.id
   vpc_security_group_ids = [aws_security_group.app.id]
   key_name               = var.key_name
+  metadata_options {
+    http_tokens = "required"
+  }
 
   root_block_device {
     volume_size = 20

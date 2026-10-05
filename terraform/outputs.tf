@@ -27,3 +27,28 @@ output "app_private_ip" {
   description = "Application server private IP"
   value       = aws_instance.app.private_ip
 }
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = aws_eks_cluster.main.name
+}
+
+output "eks_cluster_endpoint" {
+  description = "EKS Kubernetes API endpoint"
+  value       = aws_eks_cluster.main.endpoint
+}
+
+output "eks_cluster_arn" {
+  description = "EKS cluster ARN"
+  value       = aws_eks_cluster.main.arn
+}
+
+output "eks_cluster_version" {
+  description = "EKS Kubernetes version"
+  value       = aws_eks_cluster.main.version
+}
+
+output "eks_node_group_name" {
+  description = "EKS managed node group name"
+  value       = aws_eks_node_group.main.node_group_name
+}
