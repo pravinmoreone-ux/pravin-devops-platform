@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: {{ .Release.Name }}-pdb
+  labels:
+    app: springboot
+
+spec:
+  minAvailable: 1
+
+  selector:
+    matchLabels:
+      app: springboot

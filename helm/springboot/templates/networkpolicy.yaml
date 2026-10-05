@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-default-deny-ingress
+  labels:
+    app: springboot
+
+spec:
+  podSelector:
+    matchLabels:
+      app: springboot
+
+  policyTypes:
+    - Ingress
