@@ -46,10 +46,12 @@ jobs:
 
       - name: Generate image tag
         id: image
-        run: echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Show image tag
-        run: echo "Image tag: ${{ steps.image.outputs.tag }}"
+        run: |
+          echo "Image tag: ${{ steps.image.outputs.tag }}"
 
       - name: Build Docker image
         run: |
