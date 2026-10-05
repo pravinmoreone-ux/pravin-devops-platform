@@ -49,6 +49,7 @@ jobs:
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.organization=pravinmoreone-ux
           -Dsonar.projectKey=pravin-devops-platform
+          -Dsonar.qualitygate.wait=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
