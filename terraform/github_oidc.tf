@@ -24,7 +24,7 @@ resource "aws_iam_role" "github_actions" {
           }
 
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:pravinmoreone-ux/pravin-devops-platform:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" = "repo:pravinmoreone-ux@230671079/pravin-devops-platform@1402933806:ref:refs/heads/main"
           }
         }
       }
