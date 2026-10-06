@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: ghcr.io/pravinmoreone-ux/pravin-devops-platform/springboot
-  tag: "sha-0518d7bc8df05c11421691425c1cf9eee1ee0dee"
+  tag: "sha-9bb2f6e5117a5197fdb6b233e0634e6ddbaec444"
   pullPolicy: IfNotPresent
 
 service:
