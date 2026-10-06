@@ -142,6 +142,36 @@ The Spring Boot Helm chart includes:
 - PodDisruptionBudget
 - Topology spread constraints
 
+## Observability
+
+The platform includes a full observability stack deployed via Argo CD:
+
+### Metrics (Prometheus + Grafana)
+- **kube-prometheus-stack**: Prometheus, Grafana, Alertmanager, kube-state-metrics, node-exporter
+- **ServiceMonitor** for Spring Boot `/actuator/prometheus` endpoint
+- **Retention**: 15 days, 20Gi storage (gp3)
+- **Dashboards**: Kubernetes cluster, JVM, Spring Boot, node-exporter
+
+### Logs (Loki + Promtail)
+- **Loki**: Single-binary mode, filesystem storage (20Gi), 30-day retention
+- **Promtail**: DaemonSet collecting all container logs
+- **Integration**: Grafana Explore for log queries
+
+### Traces (Tempo)
+- **Tempo**: Single-binary mode, filesystem storage (20Gi), 30-day retention
+- **Receivers**: OTLP (gRPC/HTTP), Zipkin, Jaeger
+- **Integration**: Grafana Traces for distributed tracing
+
+### Telemetry Pipeline (OpenTelemetry Collector)
+- **DaemonSet**: Node-level host metrics, kubelet metrics, Kubernetes events
+- **Deployment**: Cluster-level OTLP receiver for application telemetry
+- **Exporters**: Prometheus (metrics), Tempo (traces), Loki (logs)
+
+### Spring Boot Instrumentation
+- **Micrometer Prometheus Registry**: Exposes `/actuator/prometheus`
+- **OpenTelemetry Spring Boot Starter**: Auto-instrumentation for traces/metrics/logs
+- **OTLP Exporter**: Sends to OpenTelemetry Collector (gRPC 4317)
+
 ## GitOps
 
 Argo CD continuously reconciles the Kubernetes state from Git.
@@ -181,9 +211,18 @@ Argo CD is configured for:
 │   └── springboot/
 │
 ├── argocd/
+│   ├── springboot-application.yaml
+│   ├── kube-prometheus-stack-application.yaml
+│   ├── loki-application.yaml
+│   ├── tempo-application.yaml
+│   └── opentelemetry-collector-application.yaml
 │
 ├── helm/
-│   └── springboot/
+│   ├── springboot/
+│   ├── kube-prometheus-stack/
+│   ├── loki/
+│   ├── tempo/
+│   └── opentelemetry-collector/
 │
 ├── policies/
 │
@@ -209,6 +248,11 @@ Argo CD is configured for:
 | Security Scanning | Trivy |
 | Application | Spring Boot |
 | Policy as Code | OPA |
+| Metrics | Prometheus, Grafana |
+| Logs | Loki, Promtail |
+| Traces | Tempo |
+| Telemetry | OpenTelemetry Collector |
+| Instrumentation | Micrometer, OpenTelemetry Java |
 
 ## Deployment Flow
 

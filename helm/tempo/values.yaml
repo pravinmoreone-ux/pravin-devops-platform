@@ -1,0 +1,120 @@
+# Tempo values for distributed tracing
+# Chart: grafana/tempo v1.7.0
+
+tempo:
+  enabled: true
+  
+  # Single binary mode for simplicity
+  deploymentMode: SingleBinary
+  
+  # Persistence
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    accessModes:
+      - ReadWriteOnce
+    size: 20Gi
+  
+  # Configuration
+  config: |
+    server:
+      http_listen_port: 3200
+      grpc_listen_port: 9095
+      log_level: info
+    
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+        zipkin:
+          endpoint: 0.0.0.0:9411
+        jaeger:
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_binary:
+            endpoint: 0.0.0.0:6831
+          thrift_compact:
+            endpoint: 0.0.0.0:6832
+    
+    ingester:
+      max_block_duration: 5m
+      max_block_bytes: 1048576
+      trace_idle_period: 10s
+    
+    compactor:
+      compaction:
+        block_retention: 30d
+        compacted_block_retention: 1h
+        retention_delay: 30m
+    
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo/traces
+        pool:
+          max_workers: 100
+          queue_depth: 10000
+    
+    overrides:
+      defaults:
+        ingestion_rate_limit_bytes: 10485760
+        ingestion_burst_size_bytes: 20971520
+  
+  # Resources
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  
+  # Security
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  
+  # Service
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3200
+        targetPort: 3200
+      - name: grpc
+        port: 9095
+        targetPort: 9095
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+      - name: zipkin
+        port: 9411
+        targetPort: 9411
+      - name: jaeger-thrift-http
+        port: 14268
+        targetPort: 14268
+      - name: jaeger-grpc
+        port: 14250
+        targetPort: 14250
+  
+  # Ingress (optional)
+  # ingress:
+  #   enabled: true
+  #   hosts:
+  #     - tempo.example.com

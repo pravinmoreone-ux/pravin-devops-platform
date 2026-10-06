@@ -1,0 +1,185 @@
+# kube-prometheus-stack values for production-style monitoring
+# Chart: prometheus-community/kube-prometheus-stack v57.2.0
+
+kube-prometheus-stack:
+  # Global settings
+  fullnameOverride: kube-prometheus-stack
+  
+  # Prometheus Operator
+  prometheusOperator:
+    enabled: true
+    admissionWebhooks:
+      enabled: true
+      patch:
+        enabled: true
+  
+  # Prometheus
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 15d
+      retentionSize: 10GiB
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 20Gi
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      # Security
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+        readOnlyRootFilesystem: true
+      # Remote write (optional - for long-term storage)
+      # remoteWrite:
+      #   - url: https://cortex.example.com/api/prom/push
+  
+  # Alertmanager
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      retention: 120h
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+        readOnlyRootFilesystem: true
+  
+  # Grafana
+  grafana:
+    enabled: true
+    adminUser: admin
+    adminPassword: ""  # Set via secret or external secret operator
+    persistence:
+      enabled: true
+      storageClassName: gp3
+      accessModes: ["ReadWriteOnce"]
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 472
+      fsGroup: 472
+      readOnlyRootFilesystem: false  # Grafana needs write for plugins
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        searchNamespace: ALL
+      datasources:
+        enabled: true
+        label: grafana_datasource
+        searchNamespace: ALL
+    # Pre-configured datasources
+    additionalDataSources:
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki.logging.svc.cluster.local:3100
+        access: proxy
+        isDefault: false
+      - name: Tempo
+        type: tempo
+        uid: tempo
+        url: http://tempo.tracing.svc.cluster.local:3200
+        access: proxy
+        isDefault: false
+    # Default dashboards
+    defaultDashboardsEnabled: true
+    defaultDashboardsTimezone: utc
+  
+  # kube-state-metrics
+  kubeStateMetrics:
+    enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      readOnlyRootFilesystem: true
+  
+  # node-exporter
+  nodeExporter:
+    enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      readOnlyRootFilesystem: true
+  
+  # Prometheus CRDs
+  prometheus:
+    prometheusSpec:
+      # Enable ServiceMonitors for Spring Boot app
+      serviceMonitorSelector:
+        matchLabels:
+          release: kube-prometheus-stack
+      podMonitorSelector:
+        matchLabels:
+          release: kube-prometheus-stack
+
+---
+# Additional ServiceMonitor for Spring Boot application
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: springboot
+  namespace: default
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: springboot
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - default

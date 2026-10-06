@@ -5,9 +5,37 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
 
   endpoint:
     health:
       probes:
         enabled: true
+    prometheus:
+      enabled: true
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# OpenTelemetry Configuration
+otel:
+  service:
+    name: springboot
+  exporter:
+    otlp:
+      endpoint: http://opentelemetry-collector.observability.svc.cluster.local:4317
+      protocol: grpc
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: otlp
+  logs:
+    exporter: otlp
+  propagators: tracecontext,baggage,b3
+  resource:
+    attributes:
+      service.name: springboot
+      service.namespace: default
+      deployment.environment: production

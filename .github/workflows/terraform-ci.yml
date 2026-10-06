@@ -78,7 +78,7 @@ jobs:
         with:
           version: latest
 
-      - name: OPA Terraform Policy Check
+      - name: OPA Terraform Policy Check - Instance Types
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           result=$(opa eval \
@@ -92,11 +92,51 @@ jobs:
           deny_count=$(echo "$result" | jq '[.result[0].expressions[0].value[]] | length')
 
           if [ "$deny_count" -gt 0 ]; then
-            echo "OPA policy violations detected."
+            echo "OPA policy violations detected (instance_types)."
             exit 1
           fi
 
-          echo "OPA policy check passed."
+          echo "OPA instance_types policy check passed."
+
+      - name: OPA Terraform Policy Check - Security
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          result=$(opa eval \
+            --format=json \
+            -d ../policy/terraform/security.rego \
+            -i tfplan.json \
+            "data.terraform.security.deny")
+
+          echo "$result"
+
+          deny_count=$(echo "$result" | jq '[.result[0].expressions[0].value[]] | length')
+
+          if [ "$deny_count" -gt 0 ]; then
+            echo "OPA policy violations detected (security)."
+            exit 1
+          fi
+
+          echo "OPA security policy check passed."
+
+      - name: OPA Terraform Policy Warnings - Security
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          result=$(opa eval \
+            --format=json \
+            -d ../policy/terraform/security.rego \
+            -i tfplan.json \
+            "data.terraform.security.warn")
+
+          echo "$result"
+
+          warn_count=$(echo "$result" | jq '[.result[0].expressions[0].value[]] | length')
+
+          if [ "$warn_count" -gt 0 ]; then
+            echo "::warning::OPA policy warnings detected (security):"
+            echo "$result" | jq -r '.result[0].expressions[0].value[]'
+          fi
+
+          echo "OPA security warnings check complete."
 
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
