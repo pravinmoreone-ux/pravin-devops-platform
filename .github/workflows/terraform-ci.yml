@@ -15,6 +15,10 @@ on:
       - "policy/terraform/**"
       - ".github/workflows/terraform-ci.yml"
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform:
     name: Terraform Validation
@@ -40,18 +44,29 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Configure AWS credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::263824391433:role/pravin-devops-platform-github-actions
+          aws-region: ap-south-1
+
       - name: Terraform Plan
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: terraform plan -out=tfplan
 
       - name: Convert Terraform Plan to JSON
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: terraform show -json tfplan > tfplan.json
 
       - name: Install OPA
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: open-policy-agent/setup-opa@v2
         with:
           version: latest
 
       - name: OPA Terraform Policy Check
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           result=$(opa eval \
             --format=json \
