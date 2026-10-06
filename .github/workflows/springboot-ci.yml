@@ -44,7 +44,7 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn -B clean test package
+        run: mvn -B clean verify
 
       - name: SonarCloud SAST
         run: >
@@ -67,6 +67,18 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t "${IMAGE_NAME}:${{ steps.image.outputs.tag }}" .
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: v0.74.0
+
+      - name: Trivy Container Security Scan
+        run: |
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            "${IMAGE_NAME}:${{ steps.image.outputs.tag }}"
 
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -92,8 +104,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-
 
           git add ../../helm/springboot/values.yaml
           git commit -m "Update Spring Boot image to ${{ steps.image.outputs.tag }}"
