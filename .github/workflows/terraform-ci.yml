@@ -4,12 +4,15 @@ on:
   pull_request:
     paths:
       - "terraform/**"
+      - "policy/terraform/**"
       - ".github/workflows/terraform-ci.yml"
+
   push:
     branches:
       - main
     paths:
       - "terraform/**"
+      - "policy/terraform/**"
       - ".github/workflows/terraform-ci.yml"
 
 jobs:
@@ -36,6 +39,36 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Convert Terraform Plan to JSON
+        run: terraform show -json tfplan > tfplan.json
+
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: OPA Terraform Policy Check
+        run: |
+          result=$(opa eval \
+            --format=json \
+            -d ../policy/terraform/instance_types.rego \
+            -i tfplan.json \
+            "data.terraform.instance_types.deny")
+
+          echo "$result"
+
+          deny_count=$(echo "$result" | jq '[.result[0].expressions[0].value[]] | length')
+
+          if [ "$deny_count" -gt 0 ]; then
+            echo "OPA policy violations detected."
+            exit 1
+          fi
+
+          echo "OPA policy check passed."
 
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@v0.2.5
